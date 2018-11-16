@@ -2,13 +2,16 @@ package tmvc;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 
 public class Console extends JPanel {
     JTextArea textArea;
     static TrayClass t = new TrayClass();
     static JFrame frame;
-    SocketClient client=new SocketClient();
 
     public Console() {
         this.textArea = new JTextArea();
@@ -26,10 +29,15 @@ public class Console extends JPanel {
         Font font = new Font("Monospaced",Font.ITALIC, 14);
         textArea.setFont(font);
         textArea.setForeground(Color.white);
+        textArea.append("Messages from socket log Service : ");
+        excecuteConection("localhost",9999);
 
         this.setPreferredSize(new Dimension(600, 400));
         this.setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
+
+
+
 
     }
 
@@ -43,6 +51,9 @@ public class Console extends JPanel {
         frame.setContentPane(panel);
         frame.pack();
         frame.setVisible(true);
+
+
+
     }
 
     public void excecuteConection(String ip, int puerto) {
@@ -50,30 +61,40 @@ public class Console extends JPanel {
             @Override
             public void run() {
                 try {
-                    client.conect(ip, puerto);
-                    client.openStream();
-                    writeOnConsole();
-                } finally {
-                    client.closeConection();
+                        Socket client = new Socket(ip, puerto);
+                        BufferedReader inputBuffer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                        System.out.println("created inputStream" + inputBuffer.toString());
+                        writeOnConsole(inputBuffer);
+                        client.close();
+                        System.out.println("desconectado");
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
+
+
             }
         });
         hilo.start();
+
     }
 
-    private void writeOnConsole(){
+
+
+
+    private void writeOnConsole(BufferedReader inputBuffer){
         try {
-            do {
-                textArea.append(client.inputBuffer.readUTF()+"\n");
-                System.out.print(client.inputBuffer.readUTF()+"\n");
-            } while (t.finish);
-        } catch (IOException e) {}
+            String text = inputBuffer.readLine()+"\n";
+            System.out.print("message from server outside do : "+ text);
+                this.textArea.append(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
     public static void main(String[] args) {
         Console console= new Console();
         console.showFrame();
-        console.excecuteConection(ip, puerto);
+//        console.excecuteConection("localhost", 9999);
     }
 }

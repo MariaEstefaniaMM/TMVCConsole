@@ -6,11 +6,11 @@ import java.util.Scanner;
 
 public class SocketClient {
     private Socket socket;
-    public DataInputStream inputBuffer = null;
-    public DataOutputStream outputBuffer = null;
+    public  DataInputStream inputBuffer = null;
+    public  DataOutputStream outputBuffer = null;
     Scanner keyBoard = new Scanner(System.in);
 
-    public void conect(String ip, int puerto) {
+    public void connect(String ip, int puerto) {
         try {
             socket = new Socket(ip, puerto);
             System.out.println("Conectado a :" + socket.getInetAddress().getHostName());
@@ -22,8 +22,8 @@ public class SocketClient {
 
     public void openStream() {
         try {
-            inputBuffer = new DataInputStream(socket.getInputStream());
-            outputBuffer = new DataOutputStream(socket.getOutputStream());
+            this.inputBuffer = new DataInputStream(socket.getInputStream());
+            this.outputBuffer = new DataOutputStream(socket.getOutputStream());
             outputBuffer.flush();
         } catch (IOException e) {
             System.out.println("Error en la apertura de flujos");
